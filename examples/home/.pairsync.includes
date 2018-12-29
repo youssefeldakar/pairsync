@@ -1,0 +1,14 @@
++ /ba-hpc
+- /ba-hpc/sw
++ /ba-hpc/**
+
++ /ba-ia
++ /ba-ia/**
+
++ /git
++ /git/**
+
++ /special-crawls
++ /special-crawls/ar-tiny
++ /special-crawls/ar-tiny/**
+- /special-crawls/**
