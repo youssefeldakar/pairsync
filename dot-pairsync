@@ -27,4 +27,43 @@ fi
 
 r="$(cat "$f/.pairsync.remote")"
 
-rsync -a --delete --include-from="$f/.pairsync.includes" --exclude=/\* "$r" "$f/"
+if ! opts=`getopt -q -o "" -l "pull,push" -- "$@"`; then
+  exit 1
+fi
+
+eval set -- "$opts"
+
+while true; do
+  case "$1" in
+    --pull)
+      pull=1
+      ;;
+    --push)
+      push=1
+      ;;
+    --help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      break
+      ;;
+  esac
+  shift
+done
+
+if [ "$pull" = 1 ] && [ "$push" = 1 ]; then
+  exit 1
+fi
+
+# - Wildcard in source path avoids assuming top dir is writable.
+# - Wildcard is processed by shell in push from local.
+# - Wildcard is processed by rsync in pull from remote.
+# - Push to /afs is very slow with -g (implied by -a) fo some reason.
+
+if [ "$push" = 1 ]; then
+  rsync -a --no-g --no-o --delete --include-from="$f/.pairsync.includes" --exclude=/\* "$f"/* "$r"/
+else
+  rsync -a --no-g --no-o --delete --include-from="$f/.pairsync.includes" --exclude=/\* "$r/*" "$f"/
+fi
