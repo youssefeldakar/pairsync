@@ -35,7 +35,13 @@ done | tac | while read i; do
   fi
 done)"
 
+if [ -z "$z" ]; then
+  echo "Remote not found" >&2
+  exit 1
+fi
+
 if ! opts=`getopt -q -o "" -l "pull,push" -- "$@"`; then
+  echo "Bad invocation" >&2
   exit 1
 fi
 
@@ -62,6 +68,7 @@ while true; do
 done
 
 if [ "$pull" = 1 ] && [ "$push" = 1 ]; then
+  echo "Pull/push selected together" >&2
   exit 1
 fi
 
