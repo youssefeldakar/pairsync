@@ -15,11 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if [ .pairsync = "$(basename "$0")" ]; then
-  f="$(dirname $(readlink -f "$0"))"
-else
-  f="$PWD"
-fi
+f="$(readlink -f "$PWD")"
 
 if [ "$f" = / ]; then
   f=
