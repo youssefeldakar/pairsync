@@ -72,8 +72,8 @@ if [ -z "$r" ]; then
 fi
 
 if [ -e "$f/.pairsync.includes" ]; then
-  incl="--include-from=$f/.pairsync.includes"
-  excl="--exclude=/*"
+  incl="$f/.pairsync.includes"
+  excl="/*"
 fi
 
 # - Wildcard in source path avoids assuming top dir is writable.
@@ -82,7 +82,7 @@ fi
 # - Push to /afs is very slow with -g (implied by -a) for some reason.
 
 if [ "$push" = 1 ]; then
-  rsync -a --no-g --no-o --delete "$incl" "$excl" "$f"/* "$r$s"/
+  rsync -a --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$f"/* "$r$s"/
 else
-  rsync -a --no-g --no-o --delete "$incl" "$excl" "$r$s/*" "$f"/
+  rsync -a --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$r$s/*" "$f"/
 fi
