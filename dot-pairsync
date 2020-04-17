@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if ! opts=`getopt -q -o "" -l "pull,push" -- "$@"`; then
+if ! opts=$(getopt -q -o "" -l "pull,push,whole" -- "$@"); then
   echo "Bad invocation" >&2
   exit 1
 fi
@@ -29,6 +29,9 @@ while true; do
       ;;
     --push)
       push=1
+      ;;
+    --whole)
+      whole=1
       ;;
     --help)
       usage
@@ -82,7 +85,15 @@ fi
 # - Push to /afs is very slow with -g (implied by -a) for some reason.
 
 if [ "$push" = 1 ]; then
-  rsync -a --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$f"/* "$r$s"/
+  if [ "$whole" = 1 ]; then
+    rsync -a --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$f"/  "$r$s"/
+  else
+    rsync -a --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$f"/* "$r$s"/
+  fi
 else
-  rsync -a --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$r$s/*" "$f"/
+  if [ "$whole" = 1 ]; then
+    rsync -a --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$r$s/"  "$f"/
+  else
+    rsync -a --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$r$s/*" "$f"/
+  fi
 fi
