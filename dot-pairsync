@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (C) 2018 Bibliotheca Alexandrina <www.bibalex.org>
+# Copyright (C) 2018-2020 Bibliotheca Alexandrina <www.bibalex.org>
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -45,12 +45,20 @@ while true; do
   shift
 done
 
-if [ "$pull" = 1 ] && [ "$push" = 1 ]; then
+# Implicit pull/push
+case $(basename "$0") in *pull) pull=1 ;; *push) push=1 ;; esac
+
+if [ -n "$pull" ] && [ -n "$push" ]; then
   echo "Pull/push selected together" >&2
   exit 1
 fi
 
-f="$(readlink -f "$PWD")"
+if [ -z "$pull" ] && [ -z "$push" ]; then
+  echo "Pull/push not specified" >&2
+  exit 1
+fi
+
+f=$(readlink -f "$PWD")
 
 if [ "$f" = / ]; then
   f=
@@ -61,12 +69,12 @@ while [ -n "$i" ]; do
   j="$i/.pairsync.remote"
 
   if [ -e "$j" ]; then
-    r="$(cat "$j")"
-    s="$(echo "$f" | cut -c"$((${#i}+1))-")"
+    r=$(cat "$j")
+    s=$(echo "$f" | cut -c$((${#i}+1))-)
     break
   fi
 
-  i="$(echo "$i" | sed 's,/[^/]*$,,')"
+  i=$(echo "$i" | sed 's,/[^/]*$,,')
 done
 
 if [ -z "$r" ]; then
@@ -84,14 +92,14 @@ fi
 # - Wildcard is processed by rsync in pull from remote.
 # - Push to /afs is very slow with -g (implied by -a) for some reason.
 
-if [ "$push" = 1 ]; then
-  if [ "$whole" = 1 ]; then
+if [ -n "$push" ]; then
+  if [ -n "$whole" ]; then
     rsync -a --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$f"/  "$r$s"/
   else
     rsync -a --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$f"/* "$r$s"/
   fi
 else
-  if [ "$whole" = 1 ]; then
+  if [ -n "$whole" ]; then
     rsync -a --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$r$s/"  "$f"/
   else
     rsync -a --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$r$s/*" "$f"/
