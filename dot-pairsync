@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if ! opts=$(getopt -q -o "" -l "pull,push,whole" -- "$@"); then
+if ! opts=$(getopt -q -o "" -l "pull,push,rootless,whole" -- "$@"); then
   echo "Bad invocation" >&2
   exit 1
 fi
@@ -29,6 +29,9 @@ while true; do
       ;;
     --push)
       push=1
+      ;;
+    --rootless)
+      rootless=1
       ;;
     --whole)
       whole=1
@@ -58,6 +61,11 @@ if [ -z "$pull" ] && [ -z "$push" ]; then
   exit 1
 fi
 
+if [ -n "$rootless" ] && [ -n "$whole" ]; then
+  echo "Pick either rootless or whole" >&2
+  exit 1
+fi
+
 f=$(readlink -f "$PWD")
 
 if [ "$f" = / ]; then
@@ -75,6 +83,11 @@ while [ -n "$i" ]; do
   fi
 
   i=$(echo "$i" | sed 's,/[^/]*$,,')
+
+  # Default to whole for partial tree sync unless explicitly rootless
+  if [ -z "$rootless" ]; then
+    whole=1
+  fi
 done
 
 if [ -z "$r" ]; then
