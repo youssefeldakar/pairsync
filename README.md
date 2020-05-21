@@ -1,4 +1,4 @@
-# dot-pairsync
+# pairsync
 
 This is a script I use to sync remote and local directories.
 
