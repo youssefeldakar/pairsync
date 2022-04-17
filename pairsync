@@ -15,12 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if ! opts=$(getopt -q -o "" -l "pull,push,rootless,whole" -- "$@"); then
+if ! opts=$(getopt -q -o "" -l "pull,push,rootless,whole,existing" -- "$@"); then
   echo "Bad invocation" >&2
   exit 1
 fi
 
 eval set -- "$opts"
+
+existing=""
 
 while true; do
   case "$1" in
@@ -35,6 +37,9 @@ while true; do
       ;;
     --whole)
       whole=1
+      ;;
+    --existing)
+      existing="--existing"
       ;;
     --help)
       usage
@@ -107,14 +112,14 @@ fi
 
 if [ -n "$push" ]; then
   if [ -n "$whole" ]; then
-    rsync -a --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$f"/  "$r$s"/
+    rsync -a $existing --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$f"/  "$r$s"/
   else
-    rsync -a --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$f"/* "$r$s"/
+    rsync -a $existing --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$f"/* "$r$s"/
   fi
 else
   if [ -n "$whole" ]; then
-    rsync -a --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$r$s/"  "$f"/
+    rsync -a $existing --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$r$s/"  "$f"/
   else
-    rsync -a --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$r$s/*" "$f"/
+    rsync -a $existing --no-g --no-o --delete --include-from="$incl" --exclude="$excl" "$r$s/*" "$f"/
   fi
 fi
